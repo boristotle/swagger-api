@@ -8,7 +8,7 @@ router.get('/api/v1/memories', function(req, res, next){
  pg.connect(conString, function(err, client, done){
     client.query('SELECT * FROM memories', function(err, result){
       done();
-      res.json(result.rows);
+      res.json(result);
     })
   })
 })
@@ -17,19 +17,10 @@ router.get('/api/v1/memories', function(req, res, next){
 // INSERT A NEW MEMORY
 router.post('/api/v1/memories', function(req, res, next){
   pg.connect(conString, function(err, client, done){
-    client.query('INSERT INTO memories (old_days, these_days, year VALUES ($1, $2, $3', [req.body.oldDays, req.body.theseDays, req.body.year], function(err, result){
+    client.query('INSERT INTO memories (old_days, these_days, year) VALUES ($1, $2, $3)',
+      [req.body.data.attributes.old_days, req.body.data.attributes.these_days, req.body.data.attributes.year], function(err, result){
       done();
-      res.json(result.rows);
-    })
-  })
-})
-
-// GET ALL MEMORIES FOR A GIVEN year
-router.get('/api/v1/memories/:year', function(req, res, next){
-  pg.connect(conString, function(err, client, done){
-    client.query('SELECT * FROM memories WHERE year=' + req.params.year, function(err, result){
-      done();
-      res.json(result.rows);
+      res.json(result);
     })
   })
 })
@@ -39,10 +30,27 @@ router.get('/api/v1/memories/:year', function(req, res, next){
 router.get('/api/v1/memories/years', function(req, res, next){
   pg.connect(conString, function(err, client, done){
     client.query('SELECT DISTINCT year FROM memories', function(err, result){
-      res.json(result.rows);
+      done(); 
+      var output = [];
+      for (var i = 0; i < result.rows.length; i++) {
+        output.push(result.rows[i].year)
+      }
+      res.json(output);
+    })
+  })  
+})
+
+// GET ALL MEMORIES FOR A GIVEN year
+router.get('/api/v1/memories/:year', function(req, res, next){
+  pg.connect(conString, function(err, client, done){
+    client.query('SELECT * FROM memories WHERE year=' + req.params.year, function(err, result){
+      done();
+      res.json(result);
     })
   })
 })
+
+
 
 
 
